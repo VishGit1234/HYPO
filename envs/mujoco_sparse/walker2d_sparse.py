@@ -1,6 +1,6 @@
 import numpy as np
-from gym import utils
-from gym.envs.mujoco import mujoco_env
+from gymnasium import utils
+from gymnasium.envs.mujoco import mujoco_env
 
 
 class Walker2dSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -15,9 +15,9 @@ class Walker2dSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         utils.EzPickle.__init__(self)
 
     def step(self, a):
-        posbefore = self.sim.data.qpos[0]
+        posbefore = self.data.qpos[0]
         self.do_simulation(a, self.frame_skip)
-        posafter, height, ang = self.sim.data.qpos[0:3]
+        posafter, height, ang = self.data.qpos[0:3]
         alive_bonus = 1.0
 
         # old reward
@@ -40,8 +40,8 @@ class Walker2dSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         return ob, reward, done, {}
 
     def _get_obs(self):
-        qpos = self.sim.data.qpos
-        qvel = self.sim.data.qvel
+        qpos = self.data.qpos
+        qvel = self.data.qvel
         return np.concatenate([qpos[1:], np.clip(qvel, -10, 10)]).ravel()
 
     def reset_model(self):

@@ -1,6 +1,6 @@
 import numpy as np
-from gym import utils
-from gym.envs.mujoco import mujoco_env
+from gymnasium import utils
+from gymnasium.envs.mujoco import mujoco_env
 
 class AntSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self, sparse_threshold=2.):
@@ -21,7 +21,7 @@ class AntSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         # forward_reward = (xposafter - xposbefore)/self.dt
         # ctrl_cost = .5 * np.square(a).sum()
         # contact_cost = 0.5 * 1e-3 * np.sum(
-        #     np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+        #     np.square(np.clip(self.data.cfrc_ext, -1, 1)))
         # survive_reward = 1.0
         # reward = forward_reward - ctrl_cost - contact_cost + survive_reward
 
@@ -43,9 +43,9 @@ class AntSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def _get_obs(self):
         return np.concatenate([
-            self.sim.data.qpos.flat[2:],
-            self.sim.data.qvel.flat,
-            np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+            self.data.qpos.flat[2:],
+            self.data.qvel.flat,
+            np.clip(self.data.cfrc_ext, -1, 1).flat,
         ])
 
     def reset_model(self):

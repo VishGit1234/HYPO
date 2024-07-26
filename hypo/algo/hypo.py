@@ -53,6 +53,8 @@ class HYPO(Algorithm):
         # Make the initial weights of bc_actor and ppo_actor consistent.
         self.policy_ppo.actor.load_state_dict(self.policy_bc.actor.state_dict())
 
+        self.use_state_norm = False
+
     def exploit(self, state):
         return self.policy_ppo.exploit(state)
 

@@ -6,15 +6,19 @@ from hypo.env import make_env
 from hypo.algo import EXP
 from hypo.utils import collect_demo
 
+from tensorboardX import SummaryWriter
 
 def run(args):
     env = make_env(args.env_id)
 
+    logger = SummaryWriter()
     algo = EXP[args.expert_algo](
         state_shape=env.observation_space.shape,
         action_shape=env.action_space.shape,
         device=torch.device(f"cuda" if (args.cuda and torch.cuda.is_available()) else "cpu"),
-        path=args.weight
+        path=args.weight,
+        seed=args.seed,
+        logger=logger
     )
 
     buffer = collect_demo(
@@ -36,7 +40,7 @@ def run(args):
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser()
-    p.add_argument('--expert_algo', type=str, default='tppo')
+    p.add_argument('--expert_algo', type=str, default='ppo')
     p.add_argument('--weight', type=str, required=True)
     p.add_argument('--env_id', type=str, default='Hopper-v2')
     p.add_argument('--buffer_size', type=int, default=10**6)
@@ -45,5 +49,6 @@ if __name__ == '__main__':
     p.add_argument('--state_norm', action='store_true')
     p.add_argument('--reward', type=int, required=True)
     p.add_argument('--seed', type=int, default=0)
+    p.add_argument('--cuda', type=bool, default=False)
     args = p.parse_args()
     run(args)

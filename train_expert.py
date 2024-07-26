@@ -40,7 +40,8 @@ def run(args):
         eval_interval=args.eval_interval,
         save_interval=args.save_interval,
         seed=args.seed,
-        logger=logger
+        logger=logger,
+        num_eval_episodes=args.num_eval_episodes
     )
     trainer.train()
     logger.close()
@@ -60,6 +61,7 @@ if __name__ == '__main__':
     p.add_argument('--coef_ent', type=float, default=0.001)
     p.add_argument('--algo', type=str, default='ppo', choices=['ppo'])
     p.add_argument('--seed', type=int, default=0)
+    p.add_argument('--num_eval_episodes', type=int, default=5)
     args = p.parse_args()
 
     run(args)

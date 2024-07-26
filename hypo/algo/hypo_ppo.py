@@ -87,13 +87,13 @@ class HPPO(Algorithm):
         t += 1
 
         action, log_pi = self.explore(state)
-        next_state, reward, done, _ = env.step(action)
+        next_state, reward, done, _, _ = env.step(action)
         mask = False if t == env._max_episode_steps else done
         self.buffer.append(state, action, reward, mask, log_pi, next_state, loc, scale)
 
         if done or t >= env._max_episode_steps:
             t = 0
-            next_state = env.reset()
+            next_state, _ = env.reset()
 
         return next_state, t
 

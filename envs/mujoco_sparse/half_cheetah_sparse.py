@@ -1,6 +1,7 @@
 import numpy as np
-from gym import utils
-from gym.envs.mujoco import mujoco_env
+from gymnasium import utils
+from gymnasium.envs.mujoco import mujoco_env
+from gymnasium import spaces
 
 
 class HalfCheetahSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -10,13 +11,19 @@ class HalfCheetahSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self._max_episode_steps = 1000
         self.reward_flags = np.ones(100000, dtype=bool)
         self.max_level = 0
-        mujoco_env.MujocoEnv.__init__(self, 'half_cheetah.xml', 5)
+        render_modes = [
+            "human",
+            "rgb_array",
+            "depth_array",
+        ]
+        self.metadata["render_modes"] = render_modes
+        mujoco_env.MujocoEnv.__init__(self, 'half_cheetah.xml', 5, spaces.Box(-np.inf, np.inf, (17,), np.float64), ["human"])
         utils.EzPickle.__init__(self)
 
     def step(self, action):
-        xposbefore = self.sim.data.qpos[0]
+        xposbefore = self.data.qpos[0]
         self.do_simulation(action, self.frame_skip)
-        xposafter = self.sim.data.qpos[0]
+        xposafter = self.data.qpos[0]
         ob = self._get_obs()
 
         # old reward
@@ -35,17 +42,17 @@ class HalfCheetahSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
             self.max_level = level
 
         done = False
-        return ob, reward, done, {}
+        return ob, reward, done, {}, {}
 
     def _get_obs(self):
         return np.concatenate([
-            self.sim.data.qpos.flat[1:],
-            self.sim.data.qvel.flat,
+            self.data.qpos.flat[1:],
+            self.data.qvel.flat,
         ])
 
     def reset_model(self):
         qpos = self.init_qpos + self.np_random.uniform(low=-.1, high=.1, size=self.model.nq)
-        qvel = self.init_qvel + self.np_random.randn(self.model.nv) * .1
+        qvel = self.init_qvel + self.np_random.integers(self.model.nv) * .1
         self.set_state(qpos, qvel)
         # new added
         self.reward_flags = np.ones(100000, dtype=bool)

@@ -5,6 +5,8 @@ import torch.nn as nn
 
 from .buffer import Buffer
 
+from gymnasium.utils.seeding import np_random
+
 
 def soft_update(target, source, tau):
     for t, s in zip(target.parameters(), source.parameters()):
@@ -23,7 +25,7 @@ def add_random_noise(action, std):
 
 
 def collect_demo(env, algo, buffer_size, device, std, p_rand, seed=0, state_norm=False):
-    env.seed(seed)
+    env.np_random, _ = np_random(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
@@ -38,7 +40,7 @@ def collect_demo(env, algo, buffer_size, device, std, p_rand, seed=0, state_norm
     total_return = 0.0
     num_episodes = 0
 
-    state = env.reset()
+    state, _ = env.reset()
     if state_norm:
         state = state_normalizer(state)
     t = 0
@@ -53,7 +55,7 @@ def collect_demo(env, algo, buffer_size, device, std, p_rand, seed=0, state_norm
             action = algo.exploit(state)
             action = add_random_noise(action, std)
 
-        next_state, reward, done, _ = env.step(action)
+        next_state, reward, done, _, _ = env.step(action)
         if state_norm:
             next_state = state_normalizer(next_state)
         mask = False if t == env._max_episode_steps else done
@@ -63,7 +65,7 @@ def collect_demo(env, algo, buffer_size, device, std, p_rand, seed=0, state_norm
         if done:
             num_episodes += 1
             total_return += episode_return
-            state = env.reset()
+            state, _ = env.reset()
             if state_norm:
                 state = state_normalizer(state)
             t = 0
@@ -71,7 +73,7 @@ def collect_demo(env, algo, buffer_size, device, std, p_rand, seed=0, state_norm
 
         state = next_state
 
-    print(f'Mean return of the expert is {total_return / num_episodes}')
+    print(f'Mean return of the expert is {total_return / num_episodes if num_episodes != 0 else episode_return}')
     return buffer
 
 

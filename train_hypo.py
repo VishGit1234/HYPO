@@ -59,7 +59,8 @@ def run():
         num_steps=args.num_steps,
         eval_interval=args.eval_interval,
         save_interval=args.save_interval,
-        seed=args.seed
+        seed=args.seed,
+        num_eval_episodes=args.num_eval_episodes
     )
     trainer.train()
     logger.close()
@@ -67,14 +68,14 @@ def run():
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser()
-    p.add_argument('--buffer', type=str, required=True)
+    p.add_argument('--buffer', type=str, default="buffers/HalfCheetah-v2/size10000_std0.01_prand0.0_rwd1500.pth")
     p.add_argument('--rollout_length', type=int, default=4096)
     p.add_argument('--num_steps', type=int, default=10**7)
     p.add_argument('--log_interval', type=int, default=10000)
     p.add_argument('--eval_interval', type=int, default=10000)
     p.add_argument('--save_interval', type=int, default=10000)
-    p.add_argument('--env_train', type=str, default='HalfCheetahSparseEnv')
-    p.add_argument('--env_eval', type=str, default='HalfCheetah-v2')
+    p.add_argument('--env_train', type=str, default='HalfCheetahSparse')
+    p.add_argument('--env_eval', type=str, default='HalfCheetah-v4')
     p.add_argument('--algo', type=str, default='hypo')
     p.add_argument('--lr_a', type=float, default=3e-4)
     p.add_argument('--lr_c', type=float, default=3e-4)
@@ -91,6 +92,6 @@ if __name__ == '__main__':
     p.add_argument('--epoch_bc', type=int, default=20)
     p.add_argument('--step_eta', type=int, default=5e5)
     p.add_argument('--kl_min', type=float, default=0.02)
-
+    p.add_argument('--num_eval_episodes', type=int, default=5)
     args = p.parse_args()
     run()

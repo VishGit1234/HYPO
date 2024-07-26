@@ -9,10 +9,10 @@ class Trainer:
         super().__init__()
 
         self.env = env
-        self.env.seed(seed)
+        # self.env.seed(seed)
 
         self.env_test = env_test
-        self.env_test.seed(2**31-seed)
+        # self.env_test.seed(2**31-seed)
 
         self.algo = algo
         self.log_dir = log_dir
@@ -34,9 +34,9 @@ class Trainer:
         # Episode's timestep.
         t = 0
         # Initialize the environment.
-        state = self.env.reset()
+        state, _ = self.env.reset()
         if self.algo.use_state_norm:
-            state = self.algo.state_normalizer(state)
+            state, _ = self.algo.state_normalizer(state)
 
         # Global timestep.
         for step in range(1, self.num_steps+1):
@@ -61,18 +61,20 @@ class Trainer:
         mean_return = 0.0
 
         for _ in range(self.num_eval_episodes):
-            state = self.env_test.reset()
+            state, _ = self.env_test.reset()
             if self.algo.use_state_norm:
-                state = self.algo.state_normalizer(state)
+                state, _ = self.algo.state_normalizer(state)
             episode_return = 0.0
             done = False
 
-            while not done:
+            steps = 0
+            while not done and steps < 1e2:
                 action = self.algo.exploit(state)
-                state, reward, done, _ = self.env_test.step(action)
+                state, reward, done, _, _ = self.env_test.step(action)
                 if self.algo.use_state_norm:
                     state = self.algo.state_normalizer(state)
                 episode_return += reward
+                steps += 1
             mean_return += episode_return / self.num_eval_episodes
         self.logger.add_scalar('data/reward', mean_return, step)
         print(f'Num steps: {step:<6}   '

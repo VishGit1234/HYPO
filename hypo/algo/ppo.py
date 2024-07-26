@@ -87,7 +87,7 @@ class PPO(Algorithm):
         t += 1
 
         action, log_pi = self.explore(state)
-        next_state, reward, done, _ = env.step(action)
+        next_state, reward, done, _, _ = env.step(action)
         if self.use_state_norm:
             next_state = self.state_normalizer(next_state)
         if self.use_reward_scaler:
@@ -98,7 +98,7 @@ class PPO(Algorithm):
 
         if done or t >= env._max_episode_steps:
             t = 0
-            next_state = env.reset()
+            next_state, _ = env.reset()
             if self.use_state_norm:
                 next_state = self.state_normalizer(next_state)
             if self.use_reward_scaler:
