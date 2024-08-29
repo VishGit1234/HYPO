@@ -1,6 +1,7 @@
 import numpy as np
 from gymnasium import utils
 from gymnasium.envs.mujoco import mujoco_env
+from gymnasium import spaces
 
 class AntSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self, sparse_threshold=2.):
@@ -9,7 +10,13 @@ class AntSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self._max_episode_steps = 1000
         self.reward_flags = np.ones(10000, dtype=bool)
         self.max_level = 0
-        mujoco_env.MujocoEnv.__init__(self, 'ant.xml', 5)
+        render_modes = [
+            "human",
+            "rgb_array",
+            "depth_array",
+        ]
+        self.metadata["render_modes"] = render_modes
+        mujoco_env.MujocoEnv.__init__(self, 'ant.xml', 5, spaces.Box(-np.inf, np.inf, (27,), np.float64), ["human"])
         utils.EzPickle.__init__(self)
 
     def step(self, a):
@@ -39,7 +46,7 @@ class AntSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and 0.2 <= state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        return ob, reward, done, dict()
+        return ob, reward, done, False, {}
 
     def _get_obs(self):
         return np.concatenate([

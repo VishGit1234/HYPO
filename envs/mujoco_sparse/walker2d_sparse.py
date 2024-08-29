@@ -1,6 +1,7 @@
 import numpy as np
 from gymnasium import utils
 from gymnasium.envs.mujoco import mujoco_env
+from gymnasium import spaces
 
 
 class Walker2dSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -11,7 +12,13 @@ class Walker2dSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self._max_episode_steps = 1000
         self.reward_flags = np.ones(10000, dtype=bool)
         self.max_level = 0
-        mujoco_env.MujocoEnv.__init__(self, "walker2d.xml", 4)
+        render_modes = [
+            "human",
+            "rgb_array",
+            "depth_array",
+        ]
+        self.metadata["render_modes"] = render_modes
+        mujoco_env.MujocoEnv.__init__(self, "walker2d.xml", 4, spaces.Box(-np.inf, np.inf, (17,), np.float64), ["human"])
         utils.EzPickle.__init__(self)
 
     def step(self, a):
@@ -37,7 +44,7 @@ class Walker2dSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
         done = not (0.8 < height < 2.0 and -1.0 < ang < 1.0)
         ob = self._get_obs()
-        return ob, reward, done, {}
+        return ob, reward, done, False, {}
 
     def _get_obs(self):
         qpos = self.data.qpos

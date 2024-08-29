@@ -42,7 +42,7 @@ class HalfCheetahSparseEnv(mujoco_env.MujocoEnv, utils.EzPickle):
             self.max_level = level
 
         done = False
-        return ob, reward, done, {}, {}
+        return ob, reward, done, False, {}
 
     def _get_obs(self):
         return np.concatenate([
